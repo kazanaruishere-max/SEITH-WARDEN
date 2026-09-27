@@ -11,7 +11,7 @@
 
 **Fase Aktif:**
 - Phase 00 — `.handoff/phase-00-agents-sync/` — **done** — AGENTS 10§ anti-slop + 7 Zones + skill SSOT + Bob real `.bob/mcp.json` → `01-agents-rewrite.md` `02-zones-skill-scaffolding.md`
-- Phase 01 — `.handoff/phase-01-langflow-chain/` — **ready → sliced** — 3-agent chain + MCP real + Sheets/Webhook → `01-refmapper.md` `02-ruleauditor.md` `03-risksynthesizer.md` `04-mcp-server.md` `05-sheets-webhook.md`
+- Phase 01 — `.handoff/phase-01-langflow-chain/` — **ready → sliced uplift** — 3-agent chain + MCP real + Sheets/Webhook + Graph+Code deterministic+HITL (v0.2.0 14 nodes) → `01-refmapper.md` `02-ruleauditor.md` `03-risksynthesizer.md` `04-mcp-server.md` `05-sheets-webhook.md` `06-ceiling-graph.md` `07-deterministic-verify.md` `08-hitl-loop.md`
 - Template — `.handoff/phase-template/00-overview.md` — SSOT Phase NN+1 (DoD 8 gate + PM veto + dual-agent + 7 Zones)
 
 **Gate WAJIB sebelum claim done (AGENTS §7 + PM veto):**
