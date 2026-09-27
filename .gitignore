@@ -1,0 +1,17 @@
+.env
+flows/*.json
+!flows/seith_warden_flow.json
+!flows/README.md
+__pycache__/
+.venv/
+*.pyc
+.ruff_cache/
+.handoff/*.md
+!.handoff/README.md
+!.handoff/phase-*/00-overview.md
+!.handoff/phase-*/0[1-9]-*.md
+!.handoff/phase-template/00-overview.md
+chroma_db/
+node_modules/
+.wt/
+_wt/

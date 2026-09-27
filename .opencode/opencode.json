@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "seith-warden-langflow": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "--with",
+        "mcp~=1.28",
+        "mcp-proxy",
+        "--transport",
+        "streamablehttp",
+        "--headers",
+        "x-api-key",
+        "${LANGFLOW_API_KEY}",
+        "http://localhost:7860/api/v1/mcp/project/a760286c-db9f-406b-bb95-4d2121592e5e/streamable"
+      ],
+      "enabled": true
+    }
+  }
+}

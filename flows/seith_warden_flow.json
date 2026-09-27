@@ -1,0 +1,13 @@
+{
+  "flow_id": "seith-warden-compliance-radar",
+  "description": "Skeleton placeholder — Phase 01 akan isi 3 prompt terkunci (RefMapper, RuleAuditor, RiskSynthesizer) + 2 vector store + 2 tool + structured output. No hardcode secret.",
+  "version": "0.1.0-skeleton",
+  "langflow_version": "placeholder",
+  "nodes": [],
+  "edges": [],
+  "env": {
+    "GOOGLE_API_KEY": "${GOOGLE_API_KEY}",
+    "LANGFLOW_API_KEY": "${LANGFLOW_API_KEY}",
+    "VECTOR_STORE": "${VECTOR_STORE}"
+  }
+}

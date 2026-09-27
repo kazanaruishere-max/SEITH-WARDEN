@@ -1,0 +1,29 @@
+name: ci-gate
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.11"
+      - run: uv sync --frozen
+        continue-on-error: true
+      - run: uv run ruff check .
+      - run: uv run python tools/pii_sanitizer.py
+      - run: uv run python -m json.tool flows/seith_warden_flow.json > /dev/null
+      - run: uv run python -m json.tool tests/test_scenarios.json > /dev/null
+      - run: uv run python -m json.tool .opencode/opencode.json > /dev/null
+      - run: uv run python -m json.tool .bob/mcp.json > /dev/null
+      - run: pwsh -NoProfile -File scripts/verify.ps1
+      - name: no plaintext secret
+        run: |
+          if grep -r "sk-hhTm" --include="*.json" --include="*.md" --include="*.ps1" .; then echo "FAIL: plaintext sk- leaked"; exit 1; fi
+          echo "no plaintext secret"
