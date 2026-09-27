@@ -1,0 +1,8 @@
+{
+  "source": "PADK OJK No. 12/PADK.05/2026 Bab III Pasal 12 — SSOT ceiling, sinkron dengan data/kb/padk_2026_curated.md",
+  "pasal12": {
+    "ayat1": { "param": "daily_rate_percent", "ceiling": 0.1, "unit": "%/hari", "scope": "konsumtif", "citation": "PADK 2026 Pasal 12 Ayat 1" },
+    "ayat1_produktif": { "param": "daily_rate_percent", "ceiling": 0.2, "unit": "%/hari", "scope": "produktif", "citation": "PADK 2026 Pasal 12 Ayat 1" },
+    "ayat3": { "param": "lock_cap_percent", "ceiling": 100, "unit": "% pokok", "scope": "bunga+denda+biaya ≤ pokok", "citation": "PADK 2026 Pasal 12 Ayat 3" }
+  }
+}

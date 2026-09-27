@@ -1,5 +1,6 @@
 import re
 
+
 def sanitize_sop_text(t: str) -> str:
     t = re.sub(r'\b\d{16}\b', '[REDACTED_NIK]', t)
     t = re.sub(r'\b(?:\d[ -]*?){13,19}\b', '[REDACTED_ACCOUNT_NO]', t)

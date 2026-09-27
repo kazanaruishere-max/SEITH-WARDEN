@@ -68,6 +68,7 @@ Input `4111 1111 1111 1111` → `[REDACTED_ACCOUNT_NO]`; NIK 16 digit → `[REDA
 ### 2.2 Collection Regulasi — `collection_ojk_padk2026`
 
 - **Sumber:** `data/kb/padk_2026_curated.md` — PADK OJK 2026, POJK 40/2024, UU P2SK 4/2026, PMK 8/2026. SSOT grounding untuk sitasi.
+- **Ceiling Graph:** `data/kb/padk_graph.json` — Knowledge Graph deterministik presisi batas (Pasal12 Ayat1 0.1%/hari konsumtif + 0.2 produtif, Ayat3 100% Lock Cap) sinkron dengan curated.md — RuleAuditor query GraphLookup `Custom Component` bukan cosine RAG (100% presisi, sitasi exact) — lihat `.handoff/06-ceiling-graph.md`.
 - **Chunking:** Hierarchical Text Splitter terstruktur `Bab → Pasal → Ayat` untuk presisi kutipan (contoh: `Bab III Pasal 12 Ayat 1 — bunga konsumtif maks 0,1%/hari`).
 - **Embedding:** Sama `text-embedding-004`, collection terpisah, tidak pernah digabung dengan SOP.
 
@@ -80,11 +81,11 @@ Input `4111 1111 1111 1111` → `[REDACTED_ACCOUNT_NO]`; NIK 16 digit → `[REDA
 Rantai sekuensial tiga agen — output JSON agen N menjadi input agen N+1.
 
 ```
-[SOP Clause + RAG Context] → SEITH-RefMapper (0.0) → {detected_references} → SEITH-RuleAuditor (0.0) → {substantive_evaluations} → WARDEN-RiskSynthesizer (0.1) → Final JSON
+[ChatInput dual persona Router] → PII re → Vector SOP 800/150 + Vector PADK hierarchical → RefMapper(0.0) → [RuleAuditor LLM extract raw% + Code ceiling_verify re + GraphLookup padk_graph.json] → RiskSynthesizer(0.1 + regex fallback) → Sheets 9 kolom → Router HIGH → API readback HITL → Chat Output strict JSON + cost_avoided
 ```
 
 - **Agent 1 RefMapper (0.0):** Deteksi kode `SEOJK` usang vs `PADK/POJK` aktif. Status enum `DEPRECATED | ACTIVE | UNKNOWN`. Prompt terkunci di `AGENTS.md §2.1`. Input: `sop_text`. Output: `{"detected_references": [{cited_code, format_type, status, migration_required}]}`.
-- **Agent 2 RuleAuditor (0.0):** Ekstrak `daily_rate_percent` + `lock_cap_percent` dan bandingkan ke plafon `0,1%/hari` & `Lock Cap 100%`. Violation jika `found_value > ceiling`. Jika SOP tanpa angka eksplisit → `PERLU_VERIFIKASI_MANUAL` (jangan tebak). Prompt terkunci `AGENTS.md §2.2`.
+- **Agent 2 RuleAuditor (0.0):** LLM ekstrak `raw:"0,25%"` saja, Code node `tools/ceiling_verify.py` `extract_percent`+`verify_ceiling(re, Graph)` deterministik bandingkan ke plafon `data/kb/padk_graph.json` 0.1%/100% — violation jika `found>ceiling` (LLM dilarang hitung). Jika tanpa angka → `PERLU_VERIFIKASI_MANUAL`. Lihat `.handoff/07-deterministic-verify.md` — Code hijau visible anti-hallucination.
 - **Agent 3 RiskSynthesizer (0.1):** Sintesis temuan 1+2, skor `risk_level HIGH|MEDIUM|LOW`, sitasi `PADK OJK No. 12/PADK.05/2026 Bab III Pasal 12`, draf klausul pengganti. Output strict JSON tunggal tanpa markdown, wajib disclaimer `Preliminary Advisory`. Prompt terkunci `AGENTS.md §2.3`.
 
 Kontrak suhu `0.0 / 0.0 / 0.1` tidak bisa diubah tanpa ADR. Fallback tunggal `PERLU_VERIFIKASI_MANUAL`.
@@ -117,16 +118,15 @@ Tool 3: input `sop_text` di Tool 1 & 2 tetap melalui PII Sanitizer sebelum ke LL
 
 Kredensial via `${env}` — `GOOGLE_API_KEY` free tier, `LANGFLOW_API_KEY` lokal. File `.opencode/opencode.json` simpan placeholder `${LANGFLOW_API_KEY}`; key plaintext lokal dev-only sampai H-1 wajib rotate.
 
-### 4.3 Bob sebagai MCP Client — Formalitas (Opencode sebagai Runtime)
+### 4.3 Bob sebagai MCP Client — Real Connected (Dual Persona Router)
 
-- **PDF Hal 21-26,30-31:** Bob = MCP client generik; Langflow = MCP server. Aliran: `User → Bob → MCP streamablehttp → Langflow :7860 → 3-agent chain → Chat Output → Bob → User`.
-- **Setup Bob (PDF Hal 56-60):** Langflow `MCP Server → JSON → Generate API Key` → Bob `Gear → MCP → + → tempel JSON` + args `--with mcp<2.0.0` → discovery 3 tools `Action+Input`. Runtime harian tetap `opencode` (protokol identik, tanpa install Bob 300MB). Bukti: `.opencode/opencode.json` `uvx mcp-proxy --transport streamablehttp --headers x-api-key`.
-- **Verifikasi lapis:** Flow Playground → MCP `Invoke-WebRequest http://localhost:7860/api/v1/flows` 200 → Bob discovery 3 tools → uji `"audit klausul Pasal 1"`. Detail lengkap: `docs/assets/bob-integration.md`.
+- **PDF Hal 21-26,30-31:** Bob = MCP client dual persona; Langflow = MCP server branching. Aliran: `User natural → Bob (audit_severity vs draft_remediation) → Router → MCP streamablehttp → Langflow :7860 (Graph+Code deterministik) → Sheets HITL → Chat Output → Bob → User`.
+- **Setup Bob Real:** `.bob/mcp.json` `lf-seith_warden` `a760286c-.../streamable` `streamablehttp + x-api-key ${LANGFLOW_API_KEY}` → Desktop `Global Variables LANGFLOW_API_KEY` reuse (no Generate API Key) fallback tanpa header jika 0 tools. Opencode `.opencode/opencode.json` protokol identik — dev via opencode, demo via Bob `Gear→MCP`.
+- **Dual Persona:** Canvas `Router audit_severity|draft_remediation` visible branching vs 3 tool flat — Technical 10% wow. Verifikasi: Flow Playground `0.25%→HIGH` vs Bob `"audit Pasal 1"+"draft perbaikan"` 2 persona → `scripts/verify.ps1 -Full` `:7860 200`. Detail: `docs/assets/bob-integration.md` real + `.handoff/08-hitl-loop.md`.
 
 ## 5. Integrasi Tool Eksternal
 
-- **Google Sheets API (Custom Component):** Audit trail permanen bagi regulator/auditor eksternal. Skema kolom (9 kolom):
-`Timestamp | Dokumen SOP | Nomor Klausul | Jenis Pelanggaran | Nilai Eksisting | Batas Regulasi | Tingkat Risiko | Rekomendasi Revisi | Status Reviewer`
+- **Google Sheets API (Custom Component) + HITL Readback:** Audit trail + closed loop — `Timestamp|Dokumen|Klausul|Jenis|Nilai|Batas|Risiko|Rekomendasi|Reviewer(HITL)`. Officer edit `Reviewer=REJECT` → `API Request` poll Sheets → re-route ke RiskSynthesizer + `cost_avoided docs*35jt*0.85` di Chat Output. Contoh: `...|HIGH|Ganti 0,1%|Pending→REJECT→re-draft`. Lihat `.handoff/08-hitl-loop.md` — User Impact 20%.
 Contoh baris: `2026-09-26T10:00:00 | SOP-Bunga | Pasal 1 | RATE_CAP_BREACH | 0,25%/hari | 0,10%/hari | HIGH | Turunkan ke 0,1%... | Pending Review`. Service account free, `SHEETS_ID` di `.env`.
 - **Webhook Notification:** `webhook.site` / Slack free webhook. Trigger conditional node — hanya `risk_level=="HIGH"` yang `sent`, `LOW/MEDIUM` → `skipped` (bukan error). `SHEETS_WEBHOOK_URL` di `.env`.
 
@@ -154,9 +154,9 @@ Output tetap valid JSON.
 
 ## 8. Kontrak Flow JSON
 
-- **File:** `flows/seith_warden_flow.json` — export Langflow. Skeleton placeholder valid JSON sekarang; Phase 01 akan isi 3 prompt template terkunci (`AGENTS.md §2`), 2 vector store node (dual-collection), 2 retriever node, 2 tool node (Sheets/Webhook), structured output node. Tidak ada hardcode secret di JSON (`${env}` only).
-- **Verifikasi:** `tree /F` cek `flows/` + `uv run python -m json.tool flows/seith_warden_flow.json` valid + `uv run python -m json.tool tests/test_scenarios.json` hijau + `uv run ruff check .` 0 di `tools/`.
+- **File:** `flows/seith_warden_flow.json` — v0.2.0 uplift (14 nodes 17 edges): ChatInput dual persona Router + PII re + Vector SOP/PADK + GraphLookup `data/kb/padk_graph.json` + Code `tools/ceiling_verify.py` deterministik + 3 prompt 0.0/0.0/0.1 + Sheets 9 kolom + Router HIGH + API readback HITL + cost_avoided. No hardcode secret `${env}` only.
+- **Verifikasi:** `tree /F` + `uv run python -m json.tool flows/seith_warden_flow.json data/kb/padk_graph.json` valid + `uv run python tools/ceiling_verify.py → ok` + `uv run ruff check .` 0 + `scripts/verify.ps1 -Full :7860 200`.
 
 ## 9. Handoff & Verification Gate
 
-Awal sesi baca `docs/AGENTS.local.md` + `.handoff/latest.md`. Akhir sesi jalankan `skill://handoff` → `.handoff/phase-NN-topic/*.md`. Klaim selesai hanya setelah `uv run ruff check .` + `uv run python tools/pii_sanitizer.py` + `python -m json.tool tests/test_scenarios.json` + `python -m json.tool flows/seith_warden_flow.json` + `tree /F` 7 zones — laporkan output asli, jangan fabrikasi. Refactor gate `fn <50 file 200-400 nesting ≤4 no dead code` via `refactor-cleaner` WAJIB.
+Awal sesi `Read docs/AGENTS.local.md + .handoff/phase-NN-topic/00-overview.md` + `skill://seith-warden-compliance` + `seith-warden-pm` gate. Akhir `skill://handoff → .handoff/phase-NN-topic/*.md` + `todowrite` trace + `✅/⚠️/🔻/♻️`. Gate: `scripts/verify.ps1` (`ruff + pii + json×4 valid + graph vs curated sync + tree 7 Zones + Bob a760286c streamablehttp no-drift`) + `ceiling_verify.py ok` + `code-reviewer+security-reviewer` paralel + `refactor-cleaner fn<50` + `no-ai-slop`. Jangan fabrikasi — PM veto jika merah.

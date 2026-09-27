@@ -1,13 +1,55 @@
 {
   "flow_id": "seith-warden-compliance-radar",
-  "description": "Skeleton placeholder — Phase 01 akan isi 3 prompt terkunci (RefMapper, RuleAuditor, RiskSynthesizer) + 2 vector store + 2 tool + structured output. No hardcode secret.",
-  "version": "0.1.0-skeleton",
+  "description": "Phase01 uplift: GraphLookup + Code ceiling_verify + dual persona Router + HITL readback. 3 prompt terkunci 0.0/0.0/0.1 + PII re + dual-vector isolated + Sheets 9 kolom + webhook HIGH only.",
+  "version": "0.2.0-uplift",
   "langflow_version": "placeholder",
-  "nodes": [],
-  "edges": [],
+  "nodes": [
+    {"id": "chat_input", "type": "ChatInput", "persona": "audit_severity|draft_remediation"},
+    {"id": "router_entry", "type": "Router", "routes": ["audit_severity", "draft_remediation"]},
+    {"id": "pii_code", "type": "Code", "file": "tools/pii_sanitizer.py", "fn": "sanitize_sop_text", "order": "NIK→rekening→email"},
+    {"id": "vector_sop", "type": "VectorStore", "collection": "collection_sop_internal", "chunk": "800/150 recursive", "embedding": "text-embedding-004", "store": "chroma-local"},
+    {"id": "vector_padk", "type": "VectorStore", "collection": "collection_ojk_padk2026", "chunk": "hierarchical Bab→Pasal→Ayat", "source": "data/kb/padk_2026_curated.md"},
+    {"id": "graph_lookup", "type": "CustomComponent", "file": "data/kb/padk_graph.json", "lookup": "pasal12 ayat1 0.1 vs ayat3 100", "citation": "PADK 12/PADK.05/2026 Bab III"},
+    {"id": "code_ceiling", "type": "Code", "file": "tools/ceiling_verify.py", "fn": "extract_percent|verify_ceiling", "deterministic": "Code not LLM math"},
+    {"id": "ref_mapper", "type": "Prompt", "temp": 0.0, "output": "detected_references[] DEPRECATED|ACTIVE", "grounding": "padk_2026_curated.md"},
+    {"id": "rule_auditor", "type": "Prompt", "temp": 0.0, "output": "substantive_evaluations[] + extract raw% only, compare via Code+Graph", "fallback": "PERLU_VERIFIKASI_MANUAL"},
+    {"id": "risk_synthesizer", "type": "Prompt", "temp": 0.1, "output": "risk_level HIGH|MEDIUM|LOW|PERLU + draft_recommendation + Preliminary Advisory", "fallback": "regex JSON"},
+    {"id": "sheets_write", "type": "Tool", "tool": "generate_compliance_remediation_log", "cols": 9, "cols_name": "Timestamp|Dokumen|Klausul|Jenis|Nilai|Batas|Risiko|Rekomendasi|Reviewer"},
+    {"id": "router_high", "type": "ConditionalRouter", "condition": "risk_level==HIGH", "then": "webhook", "else": "skipped"},
+    {"id": "api_readback", "type": "APIRequest", "poll": "Sheets Reviewer col REJECT→re-route", "cost": "cost_avoided docs*35jt*0.85"},
+    {"id": "webhook", "type": "Webhook", "trigger": "HIGH only"},
+    {"id": "chat_output", "type": "ChatOutput", "strict_json": true, "include": "audit_summary+findings+impact cost_avoided"}
+  ],
+  "edges": [
+    ["chat_input", "router_entry"],
+    ["router_entry", "pii_code"],
+    ["pii_code", "vector_sop"],
+    ["pii_code", "vector_padk"],
+    ["vector_sop", "ref_mapper"],
+    ["vector_padk", "ref_mapper"],
+    ["ref_mapper", "rule_auditor"],
+    ["rule_auditor", "code_ceiling"],
+    ["code_ceiling", "graph_lookup"],
+    ["code_ceiling", "risk_synthesizer"],
+    ["graph_lookup", "risk_synthesizer"],
+    ["risk_synthesizer", "sheets_write"],
+    ["sheets_write", "router_high"],
+    ["router_high", "webhook"],
+    ["sheets_write", "api_readback"],
+    ["api_readback", "chat_output"],
+    ["webhook", "chat_output"]
+  ],
+  "mcp": {
+    "endpoint": "http://localhost:7860/api/v1/mcp/project/a760286c-db9f-406b-bb95-4d2121592e5e/streamable",
+    "transport": "streamablehttp",
+    "tools": ["audit_sop_regulatory_reference", "evaluate_rate_cap_substance", "generate_compliance_remediation_log"],
+    "persona_tools": ["audit_severity", "draft_remediation"]
+  },
   "env": {
     "GOOGLE_API_KEY": "${GOOGLE_API_KEY}",
     "LANGFLOW_API_KEY": "${LANGFLOW_API_KEY}",
-    "VECTOR_STORE": "${VECTOR_STORE}"
+    "VECTOR_STORE": "${VECTOR_STORE}",
+    "SHEETS_ID": "${SHEETS_ID}",
+    "SHEETS_WEBHOOK_URL": "${SHEETS_WEBHOOK_URL}"
   }
 }
