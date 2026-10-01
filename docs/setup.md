@@ -69,7 +69,34 @@ uv run python -m json.tool flows/seith_warden_flow.json
 2. Project/MCP: MCP aktif, endpoint benar, flow ditemukan.
 3. Bob terakhir: Bob discover 3 tools, uji `"audit klausul Pasal 1"`.
 
-## 9. Submit (4 Okt 2026)
+## 9. Setup Google Sheets Audit Trail via Apps Script Proxy
+
+Untuk mencatat 9 kolom audit trail kepatuhan secara real-time ke Google Spreadsheet:
+
+1. Buat Google Spreadsheet baru, siapkan header di Baris 1:
+   `Timestamp | Document | Clause | Category | Found_Value | Limit | Risk_Level | Recommendation | Reviewer`
+2. Klik **Extensions > Apps Script**, ganti isinya dengan kode berikut:
+   ```javascript
+   function doPost(e) {
+     if (e.parameter.token !== "SEITH_WARDEN_2026") {
+       return ContentService.createTextOutput(JSON.stringify({status: "forbidden", message: "Invalid token"}))
+         .setMimeType(ContentService.MimeType.JSON);
+     }
+     var d = JSON.parse(e.postData.contents);
+     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+     sheet.appendRow([d.timestamp, d.document, d.clause, d.category, d.found_value, d.limit, d.risk_level, d.recommendation, d.reviewer]);
+     return ContentService.createTextOutput(JSON.stringify({status: "ok", row: sheet.getLastRow()}))
+       .setMimeType(ContentService.MimeType.JSON);
+   }
+   ```
+3. Klik **Deploy > New deployment** (atau **Manage deployments > New version** jika memperbarui):
+   - Jenis: **Web app**
+   - *Execute as:* **Me (email Anda)**
+   - *Who has access:* **Anyone**
+4. Salin Web App URL (contoh: `https://script.google.com/macros/s/.../exec`).
+5. Tempel URL tersebut ke kolom **Google Sheets Web App URL** pada node `Sheets & Webhook Dispatcher` di Langflow Desktop (atau set `SHEETS_WEBHOOK_URL` di `.env`). Sistem akan otomatis menyematkan `?token=SEITH_WARDEN_2026` pada panggilan HTTP POST.
+
+## 10. Submit (4 Okt 2026)
 
 - Revoke H-1 (2026-10-03): ganti `.opencode/opencode.json` plaintext `sk-hhTm1...` → `${env}`.
 - Pastikan repo/file public `Anyone with the link` di `bit.ly/submit-hackathon` + absensi `bit.ly/absensi-hackathon` tiap camp.
