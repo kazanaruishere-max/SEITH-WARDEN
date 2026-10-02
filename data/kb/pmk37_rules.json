@@ -1,0 +1,47 @@
+[
+  {
+    "rule_id": "R-RATE-CAP",
+    "description": "Pemungutan PPh Pasal 22 oleh marketplace sebesar 0,5% dari peredaran bruto (invoice) tidak termasuk PPN/PPnBM",
+    "source_title": "Siaran Pers DJP SP-14/2026",
+    "source_url": "https://www.pajak.go.id/en/node/120146",
+    "pasal": "BELUM_DIVERIFIKASI",
+    "verified_at": "2026-10-01",
+    "confidence": "SECONDARY"
+  },
+  {
+    "rule_id": "R-EXEMPT-OP-500M",
+    "description": "Wajib Pajak orang pribadi dengan omzet sampai dengan Rp500 juta dalam satu tahun pajak tidak dipungut PPh 22 jika menyampaikan surat pernyataan",
+    "source_title": "Siaran Pers DJP SP-14/2026",
+    "source_url": "https://www.pajak.go.id/en/node/120146",
+    "pasal": "BELUM_DIVERIFIKASI",
+    "verified_at": "2026-10-01",
+    "confidence": "SECONDARY"
+  },
+  {
+    "rule_id": "R-THRESHOLD-NEXT-MONTH",
+    "description": "Jika omzet melewati Rp500 juta pada bulan M, seller memberitahukan paling lambat akhir bulan M; pemungutan berlaku mulai bulan M+1",
+    "source_title": "Artikel Edukasi DJP (Eka Ardi Handoko)",
+    "source_url": "https://www.pajak.go.id/en/node/120342",
+    "pasal": "BELUM_DIVERIFIKASI",
+    "verified_at": "2026-10-01",
+    "confidence": "SECONDARY"
+  },
+  {
+    "rule_id": "R-BADAN-NO-THRESHOLD",
+    "description": "Wajib Pajak Badan dipungut 0,5% tanpa fasilitas ambang batas Rp500 juta kecuali memiliki SKB valid",
+    "source_title": "Siaran Pers DJP SP-14/2026",
+    "source_url": "https://www.pajak.go.id/en/node/120146",
+    "pasal": "BELUM_DIVERIFIKASI",
+    "verified_at": "2026-10-01",
+    "confidence": "SECONDARY"
+  },
+  {
+    "rule_id": "R-SUSPENSION-REFUND",
+    "description": "Pemungutan pada masa suspensi wajib dikembalikan kepada seller",
+    "source_title": "Laporan Periskop.id / Pengumuman DJP",
+    "source_url": "https://periskop.id/perdagangan/20260918/pph-marketplace-05-berlaku-1-november-seller-omzet-hingga-rp500-juta-dikecualikan",
+    "pasal": "BELUM_DIVERIFIKASI",
+    "verified_at": "2026-10-01",
+    "confidence": "UNVERIFIED"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "label": "ASSUMPTION_FOR_TEST",
+  "scenario_a": {
+    "description": "Skenario A: Berlaku efektif 1 November 2026 tanpa periode suspensi (mengacu pernyataan Dirjen Pajak di Periskop 18 Sep 2026)",
+    "status": "ASSUMED",
+    "effective_date": "2026-11-01",
+    "suspension_window": null,
+    "threshold_idr": "500000000",
+    "rate_cap_percent": "0.5"
+  },
+  "scenario_b": {
+    "description": "Skenario B: Simulasi suspensi awal Agustus (2026-08-01 s.d. 2026-08-05) untuk pengujian hak pengembalian dana (REFUND_PENDING)",
+    "status": "ASSUMED",
+    "effective_date": "2026-08-01",
+    "suspension_window": [
+      "2026-08-01",
+      "2026-08-05"
+    ],
+    "threshold_idr": "500000000",
+    "rate_cap_percent": "0.5"
+  }
+}

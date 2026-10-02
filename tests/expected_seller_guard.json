@@ -1,0 +1,265 @@
+{
+  "description": "Oracle kasus hitungan tangan independen untuk verifikasi engine Seller Payout & PPh 22 Guard",
+  "cases": {
+    "T01": {
+      "case_name": "OP Bebas PPh 22 tapi Dipungut (OVER_WITHHELD)",
+      "scenario": "scenario_a",
+      "profile": {
+        "taxpayer_type": "OP",
+        "statement_status": "UNDER_500",
+        "statement_date": "2026-10-01",
+        "skb_valid": false,
+        "other_channel_ytd_gross": "50000000"
+      },
+      "transaction": {
+        "order_id": "ORD-001",
+        "marketplace": "Marketplace A",
+        "order_date": "2026-11-04",
+        "payment_received_date": "2026-11-05",
+        "gross_invoice_value": "10000000",
+        "pph22_withheld": "50000",
+        "pph22_refunded": "0",
+        "status": "COMPLETED"
+      },
+      "expected_findings": [
+        {
+          "finding_id": "F-T01",
+          "type": "OVER_WITHHELD",
+          "order_ids": [
+            "ORD-001"
+          ],
+          "observed_idr": "50000",
+          "expected_idr": "0",
+          "delta_idr": "50000",
+          "source_ref": "R-EXEMPT-OP-500M",
+          "confidence": "SECONDARY"
+        }
+      ]
+    },
+    "T02": {
+      "case_name": "OP Tanpa Surat Pernyataan (STATEMENT_MISSING)",
+      "scenario": "scenario_a",
+      "profile": {
+        "taxpayer_type": "OP",
+        "statement_status": "NONE",
+        "statement_date": null,
+        "skb_valid": false,
+        "other_channel_ytd_gross": "0"
+      },
+      "transaction": {
+        "order_id": "ORD-002",
+        "marketplace": "Marketplace B",
+        "order_date": "2026-11-09",
+        "payment_received_date": "2026-11-10",
+        "gross_invoice_value": "2000000",
+        "pph22_withheld": "10000",
+        "pph22_refunded": "0",
+        "status": "COMPLETED"
+      },
+      "expected_findings": [
+        {
+          "finding_id": "F-T02",
+          "type": "STATEMENT_MISSING",
+          "order_ids": [
+            "ORD-002"
+          ],
+          "observed_idr": "10000",
+          "expected_idr": "10000",
+          "delta_idr": "0",
+          "source_ref": "R-RATE-CAP",
+          "confidence": "SECONDARY"
+        }
+      ]
+    },
+    "T03": {
+      "case_name": "Ambang Terlampaui di Tengah Bulan (THRESHOLD_CROSSED_NOTIFY_REQUIRED)",
+      "scenario": "scenario_a",
+      "profile": {
+        "taxpayer_type": "OP",
+        "statement_status": "UNDER_500",
+        "statement_date": "2026-10-01",
+        "skb_valid": false,
+        "other_channel_ytd_gross": "495000000"
+      },
+      "transaction": {
+        "order_id": "ORD-003",
+        "marketplace": "Marketplace A",
+        "order_date": "2026-11-14",
+        "payment_received_date": "2026-11-15",
+        "gross_invoice_value": "10000000",
+        "pph22_withheld": "0",
+        "pph22_refunded": "0",
+        "status": "COMPLETED"
+      },
+      "expected_findings": [
+        {
+          "finding_id": "F-T03",
+          "type": "THRESHOLD_CROSSED_NOTIFY_REQUIRED",
+          "order_ids": [
+            "ORD-003"
+          ],
+          "observed_idr": "0",
+          "expected_idr": "0",
+          "delta_idr": "0",
+          "cumulative_gross_idr": "505000000",
+          "notify_deadline": "2026-11-30",
+          "source_ref": "R-THRESHOLD-NEXT-MONTH",
+          "confidence": "SECONDARY"
+        }
+      ]
+    },
+    "T04": {
+      "case_name": "Pungutan Masa Suspensi Belum Dikembalikan (REFUND_PENDING)",
+      "scenario": "scenario_b",
+      "profile": {
+        "taxpayer_type": "OP",
+        "statement_status": "UNDER_500",
+        "statement_date": "2026-07-25",
+        "skb_valid": false,
+        "other_channel_ytd_gross": "20000000"
+      },
+      "transaction": {
+        "order_id": "ORD-004",
+        "marketplace": "Marketplace C",
+        "order_date": "2026-08-02",
+        "payment_received_date": "2026-08-03",
+        "gross_invoice_value": "4000000",
+        "pph22_withheld": "20000",
+        "pph22_refunded": "0",
+        "status": "COMPLETED"
+      },
+      "expected_findings": [
+        {
+          "finding_id": "F-T04",
+          "type": "REFUND_PENDING",
+          "order_ids": [
+            "ORD-004"
+          ],
+          "observed_idr": "20000",
+          "expected_idr": "0",
+          "delta_idr": "20000",
+          "source_ref": "R-SUSPENSION-REFUND",
+          "confidence": "UNVERIFIED"
+        }
+      ]
+    },
+    "T05": {
+      "case_name": "WP Badan Pungutan 0,5% Sesuai Aturan (COMPLIANT)",
+      "scenario": "scenario_a",
+      "profile": {
+        "taxpayer_type": "BADAN",
+        "statement_status": "NONE",
+        "statement_date": null,
+        "skb_valid": false,
+        "other_channel_ytd_gross": "1000000000"
+      },
+      "transaction": {
+        "order_id": "ORD-005",
+        "marketplace": "Marketplace B",
+        "order_date": "2026-11-19",
+        "payment_received_date": "2026-11-20",
+        "gross_invoice_value": "20000000",
+        "pph22_withheld": "100000",
+        "pph22_refunded": "0",
+        "status": "COMPLETED"
+      },
+      "expected_findings": []
+    },
+    "T06": {
+      "case_name": "Transaksi Retur Barang (PERLU_VERIFIKASI_MANUAL)",
+      "scenario": "scenario_a",
+      "profile": {
+        "taxpayer_type": "OP",
+        "statement_status": "UNDER_500",
+        "statement_date": "2026-10-01",
+        "skb_valid": false,
+        "other_channel_ytd_gross": "10000000"
+      },
+      "transaction": {
+        "order_id": "ORD-006",
+        "marketplace": "Marketplace A",
+        "order_date": "2026-11-21",
+        "payment_received_date": "2026-11-22",
+        "gross_invoice_value": "1000000",
+        "pph22_withheld": "5000",
+        "pph22_refunded": "0",
+        "status": "RETURNED"
+      },
+      "expected_findings": [
+        {
+          "finding_id": "F-T06",
+          "type": "PERLU_VERIFIKASI_MANUAL",
+          "order_ids": [
+            "ORD-006"
+          ],
+          "reason": "Transaksi retur memerlukan verifikasi bukti potong pembetulan",
+          "confidence": "SECONDARY"
+        }
+      ]
+    },
+    "T07": {
+      "case_name": "Omzet Mendekati Ambang Batas 85% (THRESHOLD_NEAR)",
+      "scenario": "scenario_a",
+      "profile": {
+        "taxpayer_type": "OP",
+        "statement_status": "UNDER_500",
+        "statement_date": "2026-10-01",
+        "skb_valid": false,
+        "other_channel_ytd_gross": "400000000"
+      },
+      "transaction": {
+        "order_id": "ORD-007",
+        "marketplace": "Marketplace A",
+        "order_date": "2026-11-24",
+        "payment_received_date": "2026-11-25",
+        "gross_invoice_value": "25000000",
+        "pph22_withheld": "0",
+        "pph22_refunded": "0",
+        "status": "COMPLETED"
+      },
+      "expected_findings": [
+        {
+          "finding_id": "F-T07",
+          "type": "THRESHOLD_NEAR",
+          "pct": "85.00",
+          "cumulative_gross_idr": "425000000",
+          "remaining_idr": "75000000",
+          "source_ref": "R-EXEMPT-OP-500M",
+          "confidence": "SECONDARY"
+        }
+      ]
+    }
+  },
+  "dataset_66_rows": {
+    "metadata": {
+      "file_name": "sales_export_dummy.csv",
+      "total_rows": 66,
+      "input_sha256": "4deb5e21ec90911f29d154345fffece74cdc53857a806055c7a768f4cdb2020a",
+      "oracle_verified_manually": true
+    },
+    "summary": {
+      "total_orders": 64,
+      "total_observed_idr": "70000",
+      "total_expected_idr": "0",
+      "potential_claim_idr": "70000",
+      "threshold": {
+        "threshold_idr": "500000000",
+        "cumulative_gross_idr": "533000000",
+        "total_completed_gross_idr": "408000000",
+        "pct": "106.60",
+        "status": "TERLAMPAUI",
+        "crossed_date": "2026-10-01",
+        "notify_deadline": "2026-10-31",
+        "remaining_idr": "0"
+      },
+      "findings_count": 10
+    },
+    "expected_findings_summary": {
+      "DATA_QUALITY": 2,
+      "THRESHOLD_CROSSED_NOTIFY_REQUIRED": 1,
+      "OVER_WITHHELD": 3,
+      "REFUND_PENDING": 2,
+      "PERLU_VERIFIKASI_MANUAL": 2
+    }
+  }
+}

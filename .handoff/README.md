@@ -11,7 +11,9 @@
 
 **Fase Aktif:**
 - Phase 00 — `.handoff/phase-00-agents-sync/` — **done** — AGENTS 10§ anti-slop + 7 Zones + skill SSOT + Bob real `.bob/mcp.json` → `01-agents-rewrite.md` `02-zones-skill-scaffolding.md`
-- Phase 01 — `.handoff/phase-01-langflow-chain/` — **ready → sliced uplift** — 3-agent chain + MCP real + Sheets/Webhook + Graph+Code deterministic+HITL (v0.2.0 14 nodes) → `01-refmapper.md` `02-ruleauditor.md` `03-risksynthesizer.md` `04-mcp-server.md` `05-sheets-webhook.md` `06-ceiling-graph.md` `07-deterministic-verify.md` `08-hitl-loop.md`
+- Phase 01 — `.handoff/phase-01-langflow-chain/` — **done** — 3-agent chain + MCP real + Sheets/Webhook + Graph+Code deterministic+HITL (v0.2.0 14 nodes) → `01-refmapper.md` `02-ruleauditor.md` `03-risksynthesizer.md` `04-mcp-server.md` `05-sheets-webhook.md` `06-ceiling-graph.md` `07-deterministic-verify.md` `08-hitl-loop.md`
+- Phase 02 — `.handoff/phase-02-security-hardening/` — **done** — Data quality audit trail fix (Pasal & found_value) + Prompt Injection Defense-in-depth + Token Unification `SEITH_WARDEN_2026` + Input Length Capping (4.000 chars) + B2B Formal Compliance Report → `00-overview.md` `01-data-quality-fix.md` `02-prompt-hardening.md` `03-input-validation.md` `04-sheets-hardening.md` `05-secrets-transport.md` `06-e2e-verify.md`
+- Phase 03 — `.handoff/phase-03-seller-guard/` — **ready to implement** — Seller Payout & PPh 22 Guard (PMK 37/2025) + Decimal arithmetic + SHA-256 tamper-proof hashing + PII strip + NumericConsistencyValidator + Google Sheets 9-column audit trail + E2E S1-S12 matrix → `00-overview.md` `01-tahap0-regulatory-verification.md` `02-tahap1-deterministic-engine.md` `03-tahap2-data-fixtures-oracle.md` `04-tahap3-langflow-canvas.md` `05-tahap4-agent-numeric-validator.md` `06-tahap5-sheets-dispatcher.md` `07-tahap6-e2e-security-verification.md`
 - Template — `.handoff/phase-template/00-overview.md` — SSOT Phase NN+1 (DoD 8 gate + PM veto + dual-agent + 7 Zones)
 
 **Gate WAJIB sebelum claim done (AGENTS §7 + PM veto):**

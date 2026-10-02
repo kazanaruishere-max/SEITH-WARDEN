@@ -1,0 +1,14 @@
+{
+  "seller_id": "SELLER-UMKM-001",
+  "seller_name": "Toko Berkah Mandiri",
+  "taxpayer_type": "OP",
+  "nik": "3201011234560001",
+  "npwp": "09.123.456.7-012.000",
+  "bank_account_no": "123456789012",
+  "bank_name": "Bank BCA",
+  "statement_status": "UNDER_500",
+  "statement_date": "2026-09-15",
+  "skb_valid": false,
+  "other_channel_ytd_gross": "125000000",
+  "tax_year": "2026"
+}
