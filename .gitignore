@@ -1,6 +1,7 @@
 .env
 flows/*.json
 !flows/seith_warden_flow.json
+!flows/seith_warden_seller_guard.json
 !flows/README.md
 __pycache__/
 .venv/
