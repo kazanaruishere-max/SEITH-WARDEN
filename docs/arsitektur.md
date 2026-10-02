@@ -152,11 +152,16 @@ Output tetap valid JSON.
 | `SHEETS_ID` / `SHEETS_WEBHOOK_URL` | Tidak | Free (Sheets API + webhook.site/Slack) | Sheets + alert |
 | `COMPOSIO_API_KEY` | Tidak | Opsional | Hanya jika pakai Composio berbayar |
 
-## 8. Kontrak Flow JSON
+## 8. Kontrak Flow JSON (P0 Pisah Flow)
 
-- **File:** `flows/seith_warden_flow.json` — v0.2.0 uplift (14 nodes 17 edges): ChatInput dual persona Router + PII re + Vector SOP/PADK + GraphLookup `data/kb/padk_graph.json` + Code `tools/ceiling_verify.py` deterministik + 3 prompt 0.0/0.0/0.1 + Sheets 9 kolom + Router HIGH + API readback HITL + cost_avoided. No hardcode secret `${env}` only.
-- **Verifikasi:** `tree /F` + `uv run python -m json.tool flows/seith_warden_flow.json data/kb/padk_graph.json` valid + `uv run python tools/ceiling_verify.py → ok` + `uv run ruff check .` 0 + `scripts/verify.ps1 -Full :7860 200`.
+- **File SOP:** `flows/seith_warden_flow.json` (4DCB, 10v13e, restore 8F1C clean, cost strings → `impact_note`, `hits 35jt/cost_avoided = 0`).
+- **File Seller Guard:** `flows/seith_warden_seller_guard.json` (4621, 10v13e, HMAC `SELLER_REF_KEY` fail-closed via Global Variable, router BOM `\ufeff` strip + case-insensitive + `;`→`,` + header strict `order_id,gross_invoice_value` atau ERROR, bar capped `min(pct,100)/100*20 + overflow 6,60%`, banners `[DUMMY][UNVERIFIED]`).
+- **Kedua flow:** Import sebagai **dua flow berbeda** di Langflow (jangan menimpa). No hardcode secret `${env}` only.
+- **Verifikasi:** `tree /F` + `uv run python -m json.tool flows/seith_warden_flow.json flows/seith_warden_seller_guard.json data/kb/padk_graph.json` valid + `uv run python tools/ceiling_verify.py → ok` + `uv run ruff check .` 0 + `scripts/verify.ps1 -Full :7860 200` + `scripts/verify_seller_guard.ps1` (8 + 13 tests, SHA 4deb = oracle 66).
 
 ## 9. Handoff & Verification Gate
 
-Awal sesi `Read docs/AGENTS.local.md + .handoff/phase-NN-topic/00-overview.md` + `skill://seith-warden-compliance` + `seith-warden-pm` gate. Akhir `skill://handoff → .handoff/phase-NN-topic/*.md` + `todowrite` trace + `✅/⚠️/🔻/♻️`. Gate: `scripts/verify.ps1` (`ruff + pii + json×4 valid + graph vs curated sync + tree 7 Zones + Bob a760286c streamablehttp no-drift`) + `ceiling_verify.py ok` + `code-reviewer+security-reviewer` paralel + `refactor-cleaner fn<50` + `no-ai-slop`. Jangan fabrikasi — PM veto jika merah.
+Awal sesi `Read docs/AGENTS.local.md + .handoff/phase-NN-topic/00-overview.md` + `skill://seith-warden-compliance` + `seith-warden-pm` gate. Akhir `skill://handoff → .handoff/phase-NN-topic/*.md` + `todowrite` trace + `✅/⚠️/🔻/♻️`.
+Gate SOP: `scripts/verify.ps1` (`ruff + pii + json×4 valid + graph vs curated sync + tree 7 Zones + Bob a760286c streamablehttp no-drift`) + `ceiling_verify.py ok`.
+Gate Seller Guard: `scripts/verify_seller_guard.ps1` (`ruff + 8 tests test_seller_guard + 13 tests test_e2e_seller_guard + json×6 valid + Graph 10v13e x2 + SHA 4deb = oracle 66` + HMAC fail-closed + router strict + bar capped).
+`code-reviewer+security-reviewer` paralel + `refactor-cleaner fn<50` + `no-ai-slop`. Jangan fabrikasi — PM veto jika merah. Oracle hitung teks `tests/fixtures/ORACLE_manual_2026-11-01.md` (533jt 106,60%) vs engine dibanding terbalik.

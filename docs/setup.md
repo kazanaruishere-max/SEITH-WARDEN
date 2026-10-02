@@ -33,15 +33,16 @@ SHEETS_WEBHOOK_URL=...
 3. Langflow → Rocket icon → Settings → Model Providers → masukkan Gemini API Key → Save.
 4. Langflow → Global Variables → Add New → Key `COMPOSIO_API_KEY` Value (jika pakai).
 
-## 4. Jalankan Langflow + MCP
+## 4. Jalankan Langflow + MCP (2 Flow Terpisah)
 
 ```bash
 uv run langflow run --host 127.0.0.1 --port 7860
 # Endpoint MCP: http://localhost:7860/api/v1/mcp/project/a760286c-db9f-406b-bb95-4d2121592e5e/streamable
 # Header: x-api-key: $LANGFLOW_API_KEY
 ```
+Import sebagai **dua flow berbeda** (jangan menimpa): `flows/seith_warden_flow.json` (SOP, 4DCB, 10v13e) dan `flows/seith_warden_seller_guard.json` (Seller Guard, 4621, 10v13e). Set Global Variable Langflow `SELLER_REF_KEY` (fail-closed HMAC) dan `SELLER_GUARD_SHEETS_URL/TOKEN` untuk Seller Guard. Detail Seller Guard: `docs/setup_seller_guard_sheets.md`.
 
-Verifikasi: `Invoke-WebRequest http://localhost:7860/api/v1/flows -Headers @{"x-api-key"="$env:LANGFLOW_API_KEY"}` harus 200 sebelum demo.
+Verifikasi: `Invoke-WebRequest http://localhost:7860/api/v1/flows -Headers @{"x-api-key"="$env:LANGFLOW_API_KEY"}` harus 200; `Graph.from_payload` kedua flow 10v13e OK sebelum demo.
 
 ## 5. Bob sebagai MCP Client — Formalitas
 
@@ -54,14 +55,20 @@ Verifikasi: `Invoke-WebRequest http://localhost:7860/api/v1/flows -Headers @{"x-
 - Default `chroma-local` gratis offline — dual collection `collection_sop_internal` + `collection_ojk_padk2026` (isolated).
 - Opsional `astra` — isi `ASTRA_DB_*` di `.env`, set `VECTOR_STORE=astra`.
 
-## 7. Test 10 Skenario
+## 7. Test Skenario (SOP + Seller Guard)
 
 ```bash
 uv run ruff check .
 uv run python tools/pii_sanitizer.py  # harus ok (re NIK→rekening→email)
+uv run python tools/ceiling_verify.py  # harus ok
 uv run python -m json.tool tests/test_scenarios.json
 uv run python -m json.tool flows/seith_warden_flow.json
+uv run python -m json.tool flows/seith_warden_seller_guard.json
+uv run python tests/test_seller_guard.py  # 8 tests
+uv run python tests/test_e2e_seller_guard.py  # 13 tests
+powershell -ExecutionPolicy Bypass -File scripts/verify_seller_guard.ps1  # 5 gates GREEN
 ```
+Seller Guard oracle: `tests/fixtures/ORACLE_manual_2026-11-01.md` (66 rows, 533jt 106,60%, 70k claim) = `data/sop_dummy/sales_export_dummy.csv` SHA 4deb. Config demo `tests/fixtures/config_demo.json` ASSUMPTION_FOR_TEST (effective 2026-11-01) terpisah dari `data/kb/pmk37_config.json` UNVERIFIED.
 
 ## 8. Verifikasi Lengkap (PDF Hal 32-34)
 
@@ -98,5 +105,6 @@ Untuk mencatat 9 kolom audit trail kepatuhan secara real-time ke Google Spreadsh
 
 ## 10. Submit (4 Okt 2026)
 
-- Revoke H-1 (2026-10-03): ganti `.opencode/opencode.json` plaintext `sk-hhTm1...` → `${env}`.
+- Revoke H-1 (2026-10-03): ganti `.opencode/opencode.json` plaintext `sk-hhTm1...` → `${env}`. `SELLER_REF_KEY` hanya di Global Variable Langflow, tidak di repo.
 - Pastikan repo/file public `Anyone with the link` di `bit.ly/submit-hackathon` + absensi `bit.ly/absensi-hackathon` tiap camp.
+- Label `[DUMMY]` dan banner `[PERINGATAN UNVERIFIED]` tetap tampil di laporan Seller Guard sampai `docs/sources/` terisi dan `pmk37_rules.json` kutip baris sumber → PRIMARY.

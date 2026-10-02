@@ -31,6 +31,10 @@
 
 | Tanggal | Keputusan | Alasan | Dampak |
 |:---|:---|:---|:---|
+| 2026-10-02 | P0 Pisah Flow SOP 4DCB & Seller Guard 4621 (1a-f) | SOP restore 8F1C verified, label 35jt/cost_avoided dihapus, Graph 10v13e x2 OK, pisah repo agar Playground tidak tabrakan | Commit 1a95d46 + ORACLE_manual 533jt 106.60% |
+| 2026-10-02 | Seller Guard HMAC SELLER_REF_KEY fail-closed (Global Variable) | SellerRef=hmac(SELLER_REF_KEY,NIK)[:12], tanpa key ValueError jelas | tools/seller_guard_engine.py |
+| 2026-10-02 | Router CSV BOM+case-insensitive+,; strict, Bar capped 20 blok + overflow | BOM strip, ;→,, header order_id+gross_invoice_value atau ERROR jelas, bar min(pct,100)/100*20 | ReportNormalizer + Verifier seller |
+| 2026-10-02 | config_demo ASSUMPTION_FOR_TEST terpisah dari pmk37_config UNVERIFIED + dataset 66 rows 4deb | effective 2026-11-01 suspend 08-01..05 as_of 2026-10-01, expected vs engine dibanding terbalik (engine vs expected) | tests/fixtures/config_demo.json + expected 66 |
 | 2026-09-26 | Dual vector `chroma-local` gratis | Free tier, demo offline, hindari vendor lock | ADR-001 |
 | 2026-09-26 | Full ID kecuali README bilingual | Kecepatan solo + pasar OJK lokal, README untuk IBM global | Konsistensi docs |
 | 2026-09-26 | H-1 revoke rule | Fleksibilitas dev solo vs keamanan submit public | Blok Accountability wajib catat |
@@ -47,12 +51,13 @@
 ## 6. Handoff & Verification Gate
 - **Awal sesi:** `Read docs/AGENTS.local.md` + `.handoff/phase-NN-topic/00-overview.md` (phase aktif).
 - **Akhir sesi/topik:** `skill://handoff` → `.handoff/phase-NN-topic/*.md` + Accountability `✅/⚠️/🔻/♻️`.
-- **Gate:** `uv run ruff check .` + `tree /F` + `10 skenario JSON valid` + `flows/seith_warden_flow.json valid` — klaim selesai hanya jika lulus dengan output asli.
-- **Tracer:** Phase00 `00-overview.md`+`01/02` done + Phase01 `00-overview.md`+`01-08` sliced uplift (Graph+Code+HITL+dual persona) → `.handoff/README.md` SSOT — flow `v0.2.0` 14 nodes.
+- **Gate SELLER GUARD:** `uv run ruff check .` + `uv run python tests/test_seller_guard.py` (8) + `uv run python tests/test_e2e_seller_guard.py` (13) + `verify_seller_guard.ps1` + `Graph 10v13e x2` + `input_sha256 4deb` = oracle 66 — klaim selesai hanya jika lulus dengan output asli.
+- **Gate SOP:** `uv run python tools/pii_sanitizer.py` + `tools/ceiling_verify.py` + `tests/test_scenarios.json` 10 oracle + `flows/seith_warden_flow.json` valid — flow `v0.2.0` 14 nodes, restore 8F1C clean.
+- **Tracer:** Phase00 `00-overview.md`+`01/02` done + Phase01 `00-overview.md`+`01-08` sliced uplift (Graph+Code+HITL+dual persona) + Phase03 P0 oracle 66 → `.handoff/README.md` SSOT — `flows/seith_warden_flow.json` 4DCB vs `seith_warden_seller_guard.json` 4621.
 
 ## 7. Roadmap Ringkas
-- **MVP Hackathon (now):** Dual ingestion → GraphLookup(0.1/100) + Code deterministic + 3-agent chain → Strict JSON + Sheets HITL REJECT→re-route + cost_avoided + Bob dual persona. *Science: Innovation 30% + RAI 15% uplift.* YAGNI OCR/BI/ISO Q2-Q4.
-- **Q2-Q4:** OCR, multi-tenant, BI/PDP expansion, OJK auto-sync. Free infra MVP = margin SaaS tinggi untuk jualan.
+- **MVP Hackathon (now):** SOP: Dual ingestion → GraphLookup(0.1/100) + Code deterministic + 3-agent chain → Strict JSON + Sheets HITL. Seller Guard: 66-row CSV → HMAC SellerRef + Decimal audit + threshold M+1 + bar capped → Sheets 11 cols. *Pisah flow agar Playground terisolasi.* YAGNI OCR/BI/ISO Q2-Q4.
+- **Q2-Q4:** OCR, multi-tenant, BI/PDP expansion, OJK auto-sync. Free infra MVP = margin SaaS tinggi untuk jualan. Harga tier tidak dicantumkan di docs (hipotesis belum divalidasi).
 
 ## 8. Referensi Cepat
-- Spec agen: `AGENTS.md` — Arsitektur: `docs/arsitektur.md` + `docs/assets/bob-integration.md` — Security: `docs/security.md` — Setup: `docs/setup.md` — Lexicon: `docs/CONTEXT.md` — Hackathon: `docs/hacktiv8_hackathon_national.md` + PDF `docs/assets/Hacktiv8 Hackathon National - Google Slide.pdf` — KB: `data/kb/padk_2026_curated.md` — Skenario: `tests/test_scenarios.json`.
+- Spec agen: `AGENTS.md` — Arsitektur: `docs/arsitektur.md` + `docs/assets/bob-integration.md` — Security: `docs/security.md` — Setup: `docs/setup.md` / `docs/setup_seller_guard_sheets.md` — Lexicon: `docs/CONTEXT.md` — Hackathon: `docs/hacktiv8_hackathon_national.md` + PDF `docs/assets/Hacktiv8 Hackathon National - Google Slide.pdf` — KB: `data/kb/padk_2026_curated.md` + `data/kb/pmk37_*` — Oracle: `tests/fixtures/ORACLE_manual_2026-11-01.md` (533jt 106.60%) — Skenario: `tests/test_scenarios.json` / `tests/expected_seller_guard.json` dataset_66_rows.
